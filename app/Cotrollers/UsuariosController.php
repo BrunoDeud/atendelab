@@ -1,0 +1,24 @@
+<?php
+
+class UsuariosController
+{
+    private PDO $pdo;
+
+    public function __contruct()
+    {
+        require __DIR__ . '/../../config/database.php';
+        $this->pdo = $pdo;
+    }
+
+    public function listar(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        $sql = 'SELECT id, nome, email, perfil, status, criado_em
+                FROM usuarios
+                ORDER BY id DESC';
+
+        $stmt = $this->pdo->query($sql);
+        $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);        
+    }
+}
