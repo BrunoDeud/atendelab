@@ -49,11 +49,11 @@ CREATE TABLE `atendimentos` (
 CREATE TABLE `pessoas` (
   `id` int(11) NOT NULL,
   `nome` varchar(100) NOT NULL,
-  `documento` varchar(20) NOT NULL,
+  `cpf` varchar(20) NOT NULL,
   `telefone` varchar(20) NOT NULL,
   `curso` varchar(100) NOT NULL,
   `periodo` varchar(100) NOT NULL,
-  `status` varchar(100) NOT NULL
+  `status` enum('ativo','inativo') DEFAULT 'ativo'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------

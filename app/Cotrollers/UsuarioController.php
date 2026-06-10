@@ -10,7 +10,7 @@ class UsuariosController
         $this->pdo = $pdo;
     }
 
-    public function listar(): void
+        public function listar(): void
     {
         header('Content-Type: application/json; charset=utf-8');
 
@@ -53,7 +53,7 @@ class UsuariosController
         echo json_encode($usuario, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     }
 
-    public function criar(): void
+        public function criar(): void
     {
         header('Content-Type: application/json; charset=utf-8');
 
@@ -112,7 +112,7 @@ class UsuariosController
         }
     }
 
-    public function atualizar(): void
+        public function atualizar(): void
     {
         header('Content-Type: application/json; charset=utf-8');
 
@@ -169,7 +169,7 @@ class UsuariosController
         }
     }
 
-    public function excluir(): void
+        public function excluir(): void
     {
         header('Content-Type: application/json; charset=utf-8');
 
