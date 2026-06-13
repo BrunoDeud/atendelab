@@ -4,21 +4,24 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-function usuarioAutenticado() {
+function usuarioAutenticado() : bool
+{
     return isset($_SESSION['usuario']);
         && is_array($_SESSION['usuario'])
 }
 
-function exigirAutenticacao() {
+function exigirAutenticacao() : void
+{
     if (!usuarioAutenticado()) {
-         &_SESSION['mensagem'] =
-         'Faça login para acessar a area restrita.';
+         $_SESSION['mensagem'] =
+            'Faça login para acessar a area restrita.';
 
-         hearder('Location: ?controller=auth&action=login');
-         exit();
+         header('Location: ?controller=auth&action=login');
+         exit;
     }
 }
 
-function usuarioAtual() {
+function usuarioAtual() : ?array
+{
     return $_SESSION['usuario'] ?? null;
 }

@@ -13,11 +13,11 @@ class AuthController
         $this->pdo = $pdo;
     }
 
-    public function exibirLogin()
+    public function exibirLogin() : void
     {
         if (usuarioAutenticado()) {
-            header('Location: ?controller=home&action=index');
-            exit();
+            header('Location: ?controller=auth&action=dashboard');
+            exit;
         }
 
         $error = $_SESSION['erro_login'] ?? null;
@@ -29,9 +29,9 @@ class AuthController
 
     public function entrar(): void
     {
-        if ($_SERVER['REQUEST_METHOD']!=='POST') {
+        if ($_SERVER['REQUEST_METHOD'] !=='POST') {
             header('Location: ?controller=auth&action=login');
-            exit();
+            exit;
         }
 
         $email = trim($_POST['email'] ?? '');
@@ -40,24 +40,26 @@ class AuthController
         if ($email === '' || $senha === '') {
             $_SESSION['erro_login'] = 'Preencha todos os campos.';
             header('Location: ?controller=auth&action=login');
-            exit();
+            exit;
         }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $_SESSION['erro_login'] = 'Email inválido.';
             header('Location: ?controller=auth&action=login');
-            exit();
+            exit;
         }
 
         $sql = 'SELECT id, nome, email, senha, perfil, status
                 FROM usuarios 
-                WHERE email = :email';
+                WHERE email = :email
+                LIMIT 1';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindvalue(':email', $email);
         $stmt->execute();
 
         $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+
         if (
             !$usuario 
             || $usuario['status'] !== 'ativo'
@@ -65,7 +67,7 @@ class AuthController
         ) {
             $_SESSION['erro_login'] = 'Email ou senha incorretos.';
             header('Location: ?controller=auth&action=login');
-            exit();
+            exit;
         }
 
         session_regenerate_id(true);
@@ -77,7 +79,7 @@ class AuthController
             'perfil' => $usuario['perfil']
         ];
 
-        header('Location: ?controller=home&action=index');
+        header('Location: ?controller=auth&action=dashboard');
         exit();
     }
 
@@ -110,7 +112,7 @@ class AuthController
         
         $_SESSION['mensagem'] = 'Logout realizado com sucesso.';
         header('Location: ?controller=auth&action=login');
-        exit();
+        exit;
     }
     
 }
