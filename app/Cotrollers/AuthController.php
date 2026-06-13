@@ -1,0 +1,116 @@
+<?php
+
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../Middleware/auth.php';
+
+class AuthController
+{
+    private PDO $pdo;
+
+    public function __construct()
+    {
+        global $pdo;
+        $this->pdo = $pdo;
+    }
+
+    public function exibirLogin()
+    {
+        if (usuarioAutenticado()) {
+            header('Location: ?controller=home&action=index');
+            exit();
+        }
+
+        $error = $_SESSION['erro_login'] ?? null;
+        $mensagem = $_SESSION['mensagem'] ?? null;
+
+        unset($_SESSION['erro_login'], $_SESSION['mensagem']);
+        require __DIR__ . '/../Views/auth/login.php';
+    }
+
+    public function entrar(): void
+    {
+        if ($_SERVER['REQUEST_METHOD']!=='POST') {
+            header('Location: ?controller=auth&action=login');
+            exit();
+        }
+
+        $email = trim($_POST['email'] ?? '');
+        $senha = $_POST['senha'] ?? '';
+
+        if ($email === '' || $senha === '') {
+            $_SESSION['erro_login'] = 'Preencha todos os campos.';
+            header('Location: ?controller=auth&action=login');
+            exit();
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $_SESSION['erro_login'] = 'Email inválido.';
+            header('Location: ?controller=auth&action=login');
+            exit();
+        }
+
+        $sql = 'SELECT id, nome, email, senha, perfil, status
+                FROM usuarios 
+                WHERE email = :email';
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindvalue(':email', $email);
+        $stmt->execute();
+
+        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (
+            !$usuario 
+            || $usuario['status'] !== 'ativo'
+            || !password_verify($senha, $usuario['senha'])
+        ) {
+            $_SESSION['erro_login'] = 'Email ou senha incorretos.';
+            header('Location: ?controller=auth&action=login');
+            exit();
+        }
+
+        session_regenerate_id(true);
+
+        $_SESSION['usuario'] = [
+            'id' => $usuario['id'],
+            'nome' => $usuario['nome'],
+            'email' => $usuario['email'],
+            'perfil' => $usuario['perfil']
+        ];
+
+        header('Location: ?controller=home&action=index');
+        exit();
+    }
+
+    public function dashboard(): void
+    {
+        exigirAutenticacao();
+        $usuario = usuarioAtual();
+        require __DIR__ . '/../Views/dashboard.php/index.php';
+    }
+
+    public function logout(): void
+    {
+        $_SESSION = [];
+        if (ini_get('session.use_cookies')) {
+            $params = session_get_cookie_params();
+
+            setcookie(
+                session_name(),
+                '',
+                time() - 42000,
+                $params['path'],
+                $params['domain'],
+                $params['secure'],
+                $params['httponly']
+            );
+        }
+
+        session_destroy();
+        session_start();
+        
+        $_SESSION['mensagem'] = 'Logout realizado com sucesso.';
+        header('Location: ?controller=auth&action=login');
+        exit();
+    }
+    
+}

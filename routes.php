@@ -4,6 +4,7 @@ require_once __DIR__ . '/app/Controllers/UsuariosController.php';
 require_once __DIR__ . '/app/Controllers/PessoasController.php';
 require_once __DIR__ . '/app/Controllers/TiposAtendimentos.php';
 require_once __DIR__ . '/app/Controllers/AtendimentosController.php';
+require_once __DIR__ . '/app/Controllers/AuthController.php';
 
 $controller = $_GET['controller'] ?? 'home';
 $action = $_GET['action'] ?? 'index';
@@ -124,6 +125,31 @@ if ($controller === 'usuarios') {
             break;
     }
 
+} elseif ($controller === 'auth') {
+    $authController = new AuthController();
+
+    switch ($action) {
+        case 'login':
+            $authController->exibirLogin();
+            break;
+
+        case 'entrar':
+            $authController->entrar();
+            break;
+
+        case 'dashboard':
+            $authController->dashboard();
+            break;
+
+        case 'logout':
+            $authController->logout();
+            break;
+
+        default:
+            http_response_code(404);
+            echo 'Ação não encontrada.';
+    }
+        break;
 } else {
 
     echo '<h1>AtendeLabb</h1>';
