@@ -10,7 +10,7 @@ class AtendimentosController
         $this->pdo = $pdo;
     }
 
-        public function listar(): void
+        public function listarAtendimentos(): void
     {
         header('Content-Type: application/json; charset=utf-8');
 
@@ -23,7 +23,7 @@ class AtendimentosController
         echo json_encode($atendimentos, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     }
 
-        public function cadastrar(): void
+        public function criarNovoAtendimento(): void
     {
         header('Content-Type: application/json; charset=utf-8');
 
@@ -54,7 +54,7 @@ class AtendimentosController
         }
     }
 
-        public function atualizar(): void
+        public function atualizarAtendimento(): void
     {
         header('Content-Type: application/json; charset=utf-8');
 
@@ -87,33 +87,7 @@ class AtendimentosController
         }
     }
 
-        public function status(): void
-    {
-        header('Content-Type: application/json; charset=utf-8');
-
-        $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
-        $status = filter_input(INPUT_POST, 'status', FILTER_SANITIZE_STRING);
-
-        if (!$id) {
-            http_response_code(400);
-            echo json_encode(['erro' => 'ID inválido.']);
-            return;
-        }
-
-        $sql = 'UPDATE atendimentos SET status = :status WHERE id = :id';
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $stmt->bindParam(':status', $status, PDO::PARAM_STR);
-
-        if ($stmt->execute()) {
-            echo json_encode(['mensagem' => 'Status do atendimento atualizado com sucesso.']);
-        } else {
-            http_response_code(500);
-            echo json_encode(['erro' => 'Erro ao atualizar status do atendimento.']);
-        }
-    }
-
-        public function visualizar(): void
+        public function buscarAtendimento(): void
     {
         header('Content-Type: application/json; charset=utf-8');
 
@@ -140,5 +114,25 @@ class AtendimentosController
             http_response_code(404);
             echo json_encode(['erro' => 'Atendimento não encontrado.']);
         }
+
+        public function excluirAtendimento(): void
+    {
+        $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+
+        if (!$id) {
+            $this->jsonResponse(['erro' => 'ID inválido'], 400);
+        }
+        try {
+            $sql = 'DELETE FROM atendimentos WHERE id = :id';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+            echo json_encode(['mensagem' => 'Atendimento excluído com sucesso.']);
+            
+        } catch (PDOException $e) {
+           http_response_code(500);
+            echo json_encode(['erro' => 'Erro ao excluir atendimento: ' . $e->getMessage()]);
+        }
+    }
     }
 }

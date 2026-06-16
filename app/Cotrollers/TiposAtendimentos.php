@@ -70,6 +70,18 @@ class TiposAtendimentos
         }
     }
 
+     public function listarTipoAtendimento(): void
+    {
+        $sql = 'SELECT id, nome, descricao, status
+                FROM tipos_atendimentos
+                ORDER BY id DESC';
+
+        $stmt = $this->pdo->query($sql);
+        $tipos_atendimentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $this->jsonResponse($tipos_atendimentos);
+    }
+
     public function atualizarAtendimento(): void
     {
         $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
