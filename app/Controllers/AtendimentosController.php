@@ -114,6 +114,7 @@ class AtendimentosController
             http_response_code(404);
             echo json_encode(['erro' => 'Atendimento não encontrado.']);
         }
+    }
 
         public function excluirAtendimento(): void
     {
@@ -133,6 +134,5 @@ class AtendimentosController
            http_response_code(500);
             echo json_encode(['erro' => 'Erro ao excluir atendimento: ' . $e->getMessage()]);
         }
-    }
     }
 }
