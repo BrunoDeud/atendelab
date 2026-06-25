@@ -42,7 +42,7 @@ class UsuariosController
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
 
-        $usuarios = $stmt->fetch(PDO::FETCH_ASSOC);
+        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$usuario) {
             http_response_code(404);

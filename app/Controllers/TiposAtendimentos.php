@@ -65,7 +65,7 @@ class TiposAtendimentos
             http_response_code(201);
             echo json_encode(['mensagem' => 'Tipo de Atendimento cadastrado com sucesso.'], JSON_UNESCAPED_UNICODE);
         } catch (PDOException $e) {
-            $this->jsonResponse(['erro' => 'Erro ao cadastrar Tipo de Atendimento'], 500);
+            echo json_encode(['erro' => 'Erro ao cadastrar Tipo de Atendimento'], 500);
 
         }
     }
@@ -79,7 +79,7 @@ class TiposAtendimentos
         $stmt = $this->pdo->query($sql);
         $tipos_atendimentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $this->jsonResponse($tipos_atendimentos);
+        echo json_encode($tipos_atendimentos, JSON_UNESCAPED_UNICODE);
     }
 
     public function atualizarAtendimento(): void
@@ -110,9 +110,9 @@ class TiposAtendimentos
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
 
-            $this->jsonResponse(['mensagem' => 'Tipo de atendimento atualizado com sucesso']);
+            echo json_encode(['mensagem' => 'Tipo de atendimento atualizado com sucesso'], JSON_UNESCAPED_UNICODE);
         } catch (PDOException $e) {
-            $this->jsonResponse(['erro' => 'Erro ao atualizar tipo de atendimento.'], 500);
+            echo json_encode(['erro' => 'Erro ao atualizar tipo de atendimento.'], 500);
         }
     }
 
@@ -121,7 +121,7 @@ class TiposAtendimentos
         $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
 
         if (!$id) {
-            $this->jsonResponse(['erro' => 'ID inválido'], 400);
+            echo json_encode(['erro' => 'ID inválido'], 400);
         }
 
         try {
@@ -130,9 +130,9 @@ class TiposAtendimentos
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
 
-            $this->jsonResponse(['mensagem' => 'Tipo de atendimento excluido com sucesso']);
+            echo json_encode(['mensagem' => 'Tipo de atendimento excluido com sucesso'], JSON_UNESCAPED_UNICODE);
         } catch (PDOException $e) {
-            $this->jsonResponse(['erro' => 'Erro ao deletar tipo de atendimento'], 500);
+            echo json_encode(['erro' => 'Erro ao deletar tipo de atendimento'], 500);
         }
     }
 }
