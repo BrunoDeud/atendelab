@@ -43,7 +43,7 @@ switch ($controller) {
             case 'listar':
                 $usuariosController->listar();
                 break;
-            case 'buscarPorId':
+            case 'buscar':
                 $usuariosController->buscarPorId();
                 break;
             case 'criar':
@@ -97,7 +97,7 @@ switch ($controller) {
             case 'listar':
                 $pessoasController->listar();
                 break;
-            case 'buscarPorId':
+            case 'buscar':
                 $pessoasController->buscarPorId();
                 break;
             case 'cadastrar':

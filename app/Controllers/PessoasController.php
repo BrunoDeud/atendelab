@@ -45,7 +45,7 @@ class PessoasController
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
 
-        $pessoa = $stmt->fetch(PDO::FETCH_ASSOC);
+        $pessoas = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$pessoa) {
             http_response_code(404);

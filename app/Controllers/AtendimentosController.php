@@ -14,13 +14,13 @@ class AtendimentosController
     {
         header('Content-Type: application/json; charset=utf-8');
 
-        $sql = 'SELECT id, pessoa_id, date_atendimento, descricao
+        $sql = 'SELECT id, pessoa_id, data_atendimento, descricao
                 FROM atendimentos
                 ORDER BY id DESC';
 
         $stmt = $this->pdo->query($sql);
-        $atendimento = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        echo json_encode($atendimento, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        $atendimentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        echo json_encode($atendimentos, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     }
 
         public function criarNovoAtendimento(): void
@@ -28,21 +28,21 @@ class AtendimentosController
         header('Content-Type: application/json; charset=utf-8');
 
         $pessoa_id = filter_input(INPUT_POST, 'pessoa_id', FILTER_VALIDATE_INT);
-        $date_atendimento = htmlspecialchars(trim($_POST['date_atendimento'] ?? ''), ENT_QUOTES, 'UTF-8');
-        $descricao = htmlspecialchars(trim($_POST['descricao'] ?? ''), ENT_QUOTES, 'UTF-8');
+        $data_atendimento = filter_input(INPUT_POST, 'data_atendimento', FILTER_SANITIZE_STRING);
+        $descricao = filter_input(INPUT_POST, 'descricao', FILTER_SANITIZE_STRING);
 
-        if (!$pessoa_id || empty($date_atendimento) || empty($descricao)) {
+        if (!$pessoa_id || !$data_atendimento || !$descricao) {
             http_response_code(400);
             echo json_encode(['erro' => 'Dados inválidos.']);
             return;
         }
 
-        $sql = 'INSERT INTO atendimentos (pessoa_id, date_atendimento, descricao)
-                VALUES (:pessoa_id, :date_atendimento, :descricao)';
+        $sql = 'INSERT INTO atendimentos (pessoa_id, data_atendimento, descricao)
+                VALUES (:pessoa_id, :data_atendimento, :descricao)';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindParam(':pessoa_id', $pessoa_id, PDO::PARAM_INT);
-        $stmt->bindParam(':date_atendimento', $date_atendimento, PDO::PARAM_STR);
+        $stmt->bindParam(':data_atendimento', $data_atendimento, PDO::PARAM_STR);
         $stmt->bindParam(':descricao', $descricao, PDO::PARAM_STR);
 
         if ($stmt->execute()) {
@@ -60,23 +60,23 @@ class AtendimentosController
 
         $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
         $pessoa_id = filter_input(INPUT_POST, 'pessoa_id', FILTER_VALIDATE_INT);
-        $date_atendimento = htmlspecialchars(trim($_POST['date_atendimento'] ?? ''), ENT_QUOTES, 'UTF-8');
-        $descricao = htmlspecialchars(trim($_POST['descricao'] ?? ''), ENT_QUOTES, 'UTF-8');
+        $data_atendimento = filter_input(INPUT_POST, 'data_atendimento', FILTER_SANITIZE_STRING);
+        $descricao = filter_input(INPUT_POST, 'descricao', FILTER_SANITIZE_STRING);
 
-        if (!$id || !$pessoa_id || !$date_atendimento || !$descricao) {
+        if (!$id || !$pessoa_id || !$data_atendimento || !$descricao) {
             http_response_code(400);
             echo json_encode(['erro' => 'Dados inválidos.']);
             return;
         }
 
         $sql = 'UPDATE atendimentos
-                SET pessoa_id = :pessoa_id, date_atendimento = :date_atendimento, descricao = :descricao
+                SET pessoa_id = :pessoa_id, data_atendimento = :data_atendimento, descricao = :descricao
                 WHERE id = :id';
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
         $stmt->bindParam(':pessoa_id', $pessoa_id, PDO::PARAM_INT);
-        $stmt->bindParam(':date_atendimento', $date_atendimento, PDO::PARAM_STR);
+        $stmt->bindParam(':data_atendimento', $data_atendimento, PDO::PARAM_STR);
         $stmt->bindParam(':descricao', $descricao, PDO::PARAM_STR);
 
         if ($stmt->execute()) {
@@ -99,7 +99,7 @@ class AtendimentosController
             return;
         }
 
-        $sql = 'SELECT id, pessoa_id, date_atendimento, descricao
+        $sql = 'SELECT id, pessoa_id, data_atendimento, descricao
                 FROM atendimentos
                 WHERE id = :id';
 
