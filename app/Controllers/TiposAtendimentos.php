@@ -47,8 +47,13 @@ class TiposAtendimentos
         $status = $_POST['status'] ?? 'ativo';
 
         if ($nome === '') {
-            http_response_code(400);
+            http_response_code(422);
             echo json_encode(['erro' => 'Nome do atendimento é obrigatorio']);
+            return;
+        }
+        if (!in_array($status, ['ativo', 'inativo'], true)) {
+            http_response_code(422);
+            echo json_encode(['erro' => 'Status invalido']);
             return;
         }
 
@@ -65,7 +70,8 @@ class TiposAtendimentos
             http_response_code(201);
             echo json_encode(['mensagem' => 'Tipo de Atendimento cadastrado com sucesso.'], JSON_UNESCAPED_UNICODE);
         } catch (PDOException $e) {
-            $this->jsonResponse(['erro' => 'Erro ao cadastrar Tipo de Atendimento'], 500);
+            http_response_code(500);
+            echo json_encode(['erro' => 'Erro ao cadastrar Tipo de Atendimento']);
 
         }
     }
@@ -74,7 +80,7 @@ class TiposAtendimentos
     {
         $sql = 'SELECT id, nome, descricao, status
                 FROM tipos_atendimentos
-                ORDER BY id DESC';
+                ORDER BY nome';
 
         $stmt = $this->pdo->query($sql);
         $tipos_atendimentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -89,11 +95,16 @@ class TiposAtendimentos
         $descricao = trim($_POST['descricao'] ?? '');
         $status = $_POST['status'] ?? 'ativo';
 
-        if (!$id) {
-            $this->jsonResponse(['erro' => 'ID é obrigatorio.'], 400);
+        if (!$id || $nome === '') {
+            http_response_code(400);
+            echo json_encode(['erro' => 'ID e nome são obrigatórios.']);
+            return;
         }
+        
         if (!in_array($status, ['ativo', 'inativo'], true)) {
-            $this->jsonResponse(['erro' => 'Status invalido.'], 400);
+            http_response_code(400);
+            echo json_encode(['erro' => 'Status invalido.']);
+            return;
         }
 
         try {
@@ -110,9 +121,10 @@ class TiposAtendimentos
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
 
-            $this->jsonResponse(['mensagem' => 'Tipo de atendimento atualizado com sucesso']);
+            echo json_encode(['mensagem' => 'Tipo de atendimento atualizado com sucesso']);
         } catch (PDOException $e) {
-            $this->jsonResponse(['erro' => 'Erro ao atualizar tipo de atendimento.'], 500);
+            http_response_code(500);
+            echo json_encode(['erro' => 'Erro ao atualizar tipo de atendimento.']);
         }
     }
 
@@ -121,7 +133,9 @@ class TiposAtendimentos
         $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
 
         if (!$id) {
-            $this->jsonResponse(['erro' => 'ID inválido'], 400);
+            http_response_code(400);
+            echo json_encode(['erro' => 'ID inválido']);
+            return;
         }
 
         try {
@@ -130,9 +144,32 @@ class TiposAtendimentos
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
 
-            $this->jsonResponse(['mensagem' => 'Tipo de atendimento excluido com sucesso']);
+            echo json_encode(['mensagem' => 'Tipo de atendimento excluido com sucesso']);
         } catch (PDOException $e) {
-            $this->jsonResponse(['erro' => 'Erro ao deletar tipo de atendimento'], 500);
+            http_response_code(500);
+            echo json_encode(['erro' => 'Erro ao deletar tipo de atendimento']);
+        }
+    }
+
+    public function inativar(): void
+    {
+        $id = filter_var($_POST['id'] ?? null, FILTER_VALIDATE_INT);
+        if (!$id) {
+            http_response_code(400);
+            echo json_encode(['erro' => 'ID inválido']);
+            return;
+        }
+
+        try {
+            $sql = "UPDATE tipos_atendimentos SET status = 'inativo' WHERE id = :id"
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+
+            echo json_encode(['mensagem' => 'Tipo de atendimento inativado com sucesso.'], JSON_UNESCAPED_UNICODE);
+        } catch (PDOException $e) {
+            http_response_code(500);
+            echo json_encode(['erro' => 'Erro ao inativar Tipo de atendimento: ']);
         }
     }
 }

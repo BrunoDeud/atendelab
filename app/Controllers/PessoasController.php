@@ -14,10 +14,10 @@ class PessoasController
     {
         header('Content-Type: application/json; charset=utf-8');
 
-       $sql = 'SELECT id, nome, documento, telefone,
-                curso, periodo, status
+       $sql = 'SELECT id, nome, documento, telefone, email,
+                curso, periodo, status, observacoes
                 FROM pessoas
-                ORDER BY id DESC';
+                ORDER BY nome';
 
         $stmt = $this->pdo->query($sql);
         $pessoas = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -36,8 +36,8 @@ class PessoasController
             return;
         }
 
-        $sql = 'SELECT id, nome, documento, 
-                telefone, curso, periodo, status
+        $sql = 'SELECT id, nome, documento, telefone, email,
+                curso, periodo, status, observacoes
                 FROM pessoas
                 WHERE id = :id';
 
@@ -63,17 +63,22 @@ class PessoasController
         $nome = trim($_POST['nome'] ?? '');
         $documento = trim($_POST['documento'] ?? '');
         $telefone = trim($_POST['telefone'] ?? '');
+        $email = trim($_POST['email'] ?? '');
         $curso = trim($_POST['curso'] ?? '');
         $periodo = trim($_POST['periodo'] ?? '');
         $status = $_POST['status'] ?? 'ativo';
+        $observacoes = trim($_POST['observacoes'] ?? '');
 
         if ($nome === '' || $documento === '' || $curso === '') {
             http_response_code(400);
             echo json_encode(['erro' => 'Nome, documento e curso são obrigatorios.']);
             return;
         }
-
-
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            http_response_code(400);
+            echo json_encode(['erro' => 'Email inválido.']);
+            return;
+        }
         if (!preg_match('/^\d{3}\.\d{3}\.\d{3}-\d{2}$/', $documento)) {
             http_response_code(400);
             echo json_encode(['erro' => 'Documento inválido.']);
@@ -99,16 +104,22 @@ class PessoasController
         }
 
         try{
-            $sql = 'INSERT INTO pessoas(nome, documento, telefone, curso, periodo, status)
-                    VALUES (:nome, :documento, :telefone, :curso, :periodo, :status)';
+            $sql = 'INSERT INTO pessoas
+                    (nome, documento, telefone, email, curso, periodo,
+                      status, observacoes)
+                    VALUES
+                    (:nome, :documento, :telefone, :email, :curso,
+                      :periodo, :status, :observacoes)';
 
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindValue(':nome', $nome);
             $stmt->bindValue(':documento', $documento);
             $stmt->bindValue(':telefone', $telefone);
+            $stmt->bindValue(':email', $email);
             $stmt->bindValue(':curso', $curso);
             $stmt->bindValue(':periodo', $periodo);
             $stmt->bindValue(':status', $status);
+            $stmt->bindValue(':observacoes', $observacoes);
             $stmt->execute();
 
             http_response_code(201);
@@ -132,13 +143,21 @@ class PessoasController
         $nome = trim($_POST['nome'] ?? '');
         $documento = trim($_POST['documento'] ?? '');
         $telefone = trim($_POST['telefone'] ?? '');
+        $email = trim($_POST['email'] ?? '');
         $curso = trim($_POST['curso'] ?? '');
         $periodo = trim($_POST['periodo'] ?? '');
         $status = $_POST['status'] ?? 'ativo';
+        $observacoes = trim($_POST['observacoes'] ?? '');
 
-        if (!$id || $nome === '' || $documento === '') {
+        if (!$id || $nome === '' || $documento === '' || $email === '') {
             http_response_code(400);
             echo json_encode(['erro' => 'ID, nome e documento são obrigatórios.']);
+            return;
+        }
+
+        if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            http_response_code(400);
+            echo json_encode(['erro' => 'Email inválido.']);
             return;
         }
 
@@ -171,18 +190,22 @@ class PessoasController
                     SET nome = :nome,
                         documento = :documento,
                         telefone = :telefone,
+                        email = :email,
                         curso = :curso,
                         periodo = :periodo,
-                        status = :status
+                        status = :status,
+                        observacoes = :observacoes
                     WHERE id = :id';
 
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindValue(':nome', $nome);
             $stmt->bindValue(':documento', $documento);
             $stmt->bindValue(':telefone', $telefone);
+            $stmt->bindValue(':email', $email);
             $stmt->bindValue(':curso', $curso);
             $stmt->bindValue(':periodo', $periodo);
             $stmt->bindValue(':status', $status);
+            $stmt->bindValue(':observacoes', $observacoes);
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
             
@@ -196,7 +219,7 @@ class PessoasController
     {
         header('Content-Type: application/json; charset=utf-8');
 
-        $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+        $id = filter_var($_POST['id'] ?? null, FILTER_VALIDATE_INT);
 
         if (!$id) {
             http_response_code(400);
@@ -214,6 +237,31 @@ class PessoasController
         } catch (PDOException $e) {
             http_response_code(500);
             echo json_encode(['erro' => 'Erro ao excluir pessoa: ']);
+        }
+    }
+
+        public function inativar(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        $id = filter_var($_POST['id'] ?? null, FILTER_VALIDATE_INT);
+
+        if (!$id) {
+            http_response_code(400);
+            echo json_encode(['erro' => 'ID inválido.']);
+            return;
+        }
+
+        try{
+            $sql = 'UPDATE pessoas SET status = "inativo" WHERE id = :id';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+
+            echo json_encode(['mensagem' => 'Pessoa inativada com sucesso.'], JSON_UNESCAPED_UNICODE);
+        } catch (PDOException $e) {
+            http_response_code(500);
+            echo json_encode(['erro' => 'Erro ao inativar pessoa: ']);
         }
     }
 } 

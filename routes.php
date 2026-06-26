@@ -82,6 +82,8 @@ switch ($controller) {
             case 'excluirAtendimento':
                 $tiposAtendimentos->excluirAtendimento();
                 break;
+            case 'inativar':
+                $tiposAtendimentos->inativar()
             default:
 
                 http_response_code(404);
@@ -109,6 +111,9 @@ switch ($controller) {
             case 'excluir':
                 $pessoasController->excluir();
                 break;
+            case 'inativar':
+                $pessoasController->inativar();
+                break;
             default:
 
                 http_response_code(404);
@@ -135,6 +140,9 @@ switch ($controller) {
                 break;
             case 'excluirAtendimento':
                 $atendimentosController->excluirAtendimento();
+                break;
+            case 'alterarStatus':
+                $atendimentosController->alterarStatus();
                 break;
             default:
 
