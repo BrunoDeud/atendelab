@@ -161,7 +161,7 @@ class TiposAtendimentos
         }
 
         try {
-            $sql = "UPDATE tipos_atendimentos SET status = 'inativo' WHERE id = :id"
+            $sql = "UPDATE tipos_atendimentos SET status = 'inativo' WHERE id = :id";
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
             $stmt->execute();

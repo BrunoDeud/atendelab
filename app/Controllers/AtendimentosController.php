@@ -36,18 +36,9 @@ class AtendimentosController
     {
         header('Content-Type: application/json; charset=utf-8');
 
-        $pessoa_id = filter_var
-            ($_POST['pessoa_id'], ?? null, 
-            FILTER_VALIDATE_INT
-        );
-        $tipoId = filter_var(
-            $_POST['tipo_atendimento_id'], ?? null,
-            FILTER_VALIDATE_INT
-        );
-        $usuarioId = filter_var(
-            $_POST['usuario_id'], ?? null,
-            FILTER_VALIDATE_INT
-        );
+        $pessoa_id = filter_var($_POST['pessoa_id'] ?? null, FILTER_VALIDATE_INT);
+        $tipoId = filter_var($_POST['tipo_atendimento_id'] ?? null, FILTER_VALIDATE_INT);
+        $usuarioId = filter_var($_POST['usuario_id'] ?? null, FILTER_VALIDATE_INT);
         $data_atendimento = filter_input(INPUT_POST, 'data_atendimento', FILTER_SANITIZE_STRING);
         $descricao = trim(filter_input(INPUT_POST, 'descricao', FILTER_SANITIZE_STRING));
         $horario = $_POST['horario_atendimento'] ?? null;

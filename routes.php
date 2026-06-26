@@ -36,6 +36,20 @@ switch ($controller) {
         }
         break;
 
+    case 'dashboard':
+        exigirAutenticacao();
+        $dashboardController = new DashboardController();
+
+        switch ($action) {
+            case 'resumo':
+            $dashboardController->resumo();
+            break;
+      default:
+        http_response_code(404);
+        echo 'Ação de dashboard não encontrada.';
+    }
+    break;
+
     case 'usuarios':
         $usuariosController = new UsuariosController();
 
@@ -59,35 +73,6 @@ switch ($controller) {
 
                 http_response_code(404);
                 echo 'Ação de usuários não encontrada.';
-                break;
-        }
-        break;
-
-    case 'tiposatendimentos':
-        $tiposAtendimentos = new TiposAtendimentos();
-
-        switch ($action) {
-            case 'criarTipoAtendimento':
-                $tiposAtendimentos->criarTipoAtendimento();
-                break;
-            case 'listarTipoAtendimento':
-                $tiposAtendimentos->listarTipoAtendimento();
-                break;
-            case 'buscarAtendimento':
-                $tiposAtendimentos->buscarAtendimento();
-                break;
-            case 'atualizarAtendimento':
-                $tiposAtendimentos->atualizarAtendimento();
-                break;
-            case 'excluirAtendimento':
-                $tiposAtendimentos->excluirAtendimento();
-                break;
-            case 'inativar':
-                $tiposAtendimentos->inativar()
-            default:
-
-                http_response_code(404);
-                echo 'Ação não encontrada.';
                 break;
         }
         break;
@@ -121,8 +106,40 @@ switch ($controller) {
                 break;
         }
         break;
+    case 'tipos':
+    case 'tiposatendimentos':
+        exigirAutenticacao();
+        $tiposAtendimentos = new TiposAtendimentos();
+
+        switch ($action) {
+            case 'criarTipoAtendimento':
+                $tiposAtendimentos->criarTipoAtendimento();
+                break;
+            case 'listarTipoAtendimento':
+                $tiposAtendimentos->listarTipoAtendimento();
+                break;
+            case 'buscarAtendimento':
+                $tiposAtendimentos->buscarAtendimento();
+                break;
+            case 'atualizarAtendimento':
+                $tiposAtendimentos->atualizarAtendimento();
+                break;
+            case 'excluirAtendimento':
+                $tiposAtendimentos->excluirAtendimento();
+                break;
+            case 'inativar':
+                $tiposAtendimentos->inativar();
+                break;
+            default:
+
+                http_response_code(404);
+                echo 'Ação não encontrada.';
+                break;
+        }
+        break;
 
     case 'atendimentos':
+        exigirAutenticacao();
         $atendimentosController = new AtendimentosController();
 
         switch ($action) {
