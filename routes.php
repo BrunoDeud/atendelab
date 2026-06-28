@@ -5,7 +5,9 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // ... restante do seu routes.php original
+require_once __DIR__ . '/app/Controllers/RelatoriosController.php';
 require_once __DIR__ . '/app/Controllers/FrontendController.php';
+require_once __DIR__ . '/app/Controllers/DashboardController.php';
 require_once __DIR__ . '/app/Controllers/UsuariosController.php';
 require_once __DIR__ . '/app/Controllers/AtendimentosController.php';
 require_once __DIR__ . '/app/Controllers/PessoasController.php';
@@ -77,7 +79,23 @@ switch ($controller) {
         }
         break;
 
+    case 'relatorios':
+        exigirAutenticacao();
+        $relatoriosController = new RelatoriosController();
+
+        switch ($action) {
+        case 'atendimentos':
+            $relatoriosController->atendimentos();
+            break;
+        default:
+            http_response_code(404);
+            echo 'Ação de relatórios não encontrada.';
+        }
+        break;
+
+
     case 'usuarios':
+        exigirAutenticacao();
         $usuariosController = new UsuariosController();
 
         switch ($action) {
@@ -105,6 +123,7 @@ switch ($controller) {
         break;
 
     case 'pessoas':
+        exigirAutenticacao();
         $pessoasController = new PessoasController();
 
         switch ($action) {

@@ -203,9 +203,9 @@ require __DIR__ . '/../layouts/header.php';
                 const rNome = labelRegistro(atendimento, 'responsavel_nome', 'responsavel', 'usuario');
                 const data = labelRegistro(atendimento, 'data_atendimento', 'data');
 
-                const classeStatus = atendimento.status === 'concluido'
+                const classeStatus = atendimento.status === 'Concluido'
                     ? 'text-bg-success'
-                    : atendimento.status === 'em_andamento'
+                    : atendimento.status === 'Em andamento'
                     ? 'text-bg-warning'
                     : 'text-bg-primary';
 
