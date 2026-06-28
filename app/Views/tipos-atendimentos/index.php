@@ -89,7 +89,7 @@ require __DIR__ . '/../layouts/header.php';
 
     async function carregarTipos() {
         try {
-            const resposta = await AtendeLabApi.get('tipos', 'listar');
+            const resposta = await AtendeLabApi.get('tipos', 'listarTipoAtendimento');
             const tipos = AtendeLabApi.toList(resposta);
 
             if (tipos.length === 0) {
@@ -126,13 +126,21 @@ require __DIR__ . '/../layouts/header.php';
 
     async function editarTipo(id) {
         try {
-            const resposta = await AtendeLabApi.get('tipos', 'buscar', { id });
+            const resposta = await AtendeLabApi.get('tipos', 'buscarAtendimento', { id });
             const tipo = AtendeLabApi.toObject(resposta);
-            novoTipo();
+            
+            cardFormulario.classList.remove('d-none');
+            formTipo.reset();
             tituloFormulario.textContent = 'Editar tipo';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            campoTipoId.value = id;
+
             for (const [nomeCampo, valorCampo] of Object.entries(tipo)) {
                 const campo = formTipo.elements.namedItem(nomeCampo);
-                if (campo) campo.value = valorCampo ?? '';
+                if (campo && nomeCampo !== 'id') {
+                    campo.value = valorCampo ?? '';
+                }
             }
         } catch (error) {
             AtendeLabApi.showAlert('alerta', error.message, 'danger');
@@ -142,7 +150,8 @@ require __DIR__ . '/../layouts/header.php';
     formTipo.addEventListener('submit', async (event) => {
         event.preventDefault();
         const id = campoTipoId.value;
-        const acao = id ? 'atualizar' : 'criar';
+        
+        const acao = id ? 'atualizarAtendimento' : 'criarTipoAtendimento';
         const mensagemSucesso = id ? 'Tipo atualizado com sucesso.' : 'Tipo cadastrado com sucesso.';
 
         try {

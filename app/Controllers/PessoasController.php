@@ -4,17 +4,17 @@ class PessoasController
 {
     private PDO $pdo;
 
-        public function __construct()
+    public function __construct()
     {
         require __DIR__ . '/../../config/database.php';
         $this->pdo = $pdo;
     }
 
-        public function listar(): void
+    public function listar(): void
     {
         header('Content-Type: application/json; charset=utf-8');
 
-       $sql = 'SELECT id, nome, documento, telefone, email,
+        $sql = 'SELECT id, nome, documento, telefone, email,
                 curso, periodo, status, observacoes
                 FROM pessoas
                 ORDER BY nome';
@@ -24,15 +24,15 @@ class PessoasController
         echo json_encode($pessoas, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     }
 
-        public function buscarPorId(): void
+    public function buscarPorId(): void
     {
-        header ('Content-Type: application/json; charset=utf-8');
+        header('Content-Type: application/json; charset=utf-8');
 
         $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
         if (!$id) {
             http_response_code(400);
-            echo json_encode(['erro' => 'ID invalido.']);
+            echo json_encode(['erro' => 'ID inválido.']);
             return;
         }
 
@@ -47,16 +47,16 @@ class PessoasController
 
         $pessoas = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$pessoa) {
+        if (!$pessoas) {
             http_response_code(404);
             echo json_encode(['erro' => 'Pessoa não encontrada']);
             return;
         }
 
-        echo json_encode($pessoa, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        echo json_encode($pessoas, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     }
 
-        public function cadastrar(): void
+    public function cadastrar(): void
     {
         header('Content-Type: application/json; charset=utf-8');
 
@@ -65,45 +65,45 @@ class PessoasController
         $telefone = trim($_POST['telefone'] ?? '');
         $email = trim($_POST['email'] ?? '');
         $curso = trim($_POST['curso'] ?? '');
-        $periodo = trim($_POST['periodo'] ?? '');
+        
+        // MODIFICAÇÃO: Converte para inteiro de forma limpa
+        $periodo = isset($_POST['periodo']) && $_POST['periodo'] !== '' ? (int)$_POST['periodo'] : null;
         $status = $_POST['status'] ?? 'ativo';
         $observacoes = trim($_POST['observacoes'] ?? '');
 
-        if ($nome === '' || $documento === '' || $curso === '') {
+        if ($nome === '' || $documento === '') {
             http_response_code(400);
-            echo json_encode(['erro' => 'Nome, documento e curso são obrigatorios.']);
+            echo json_encode(['erro' => 'Nome e documento são obrigatórios.']);
             return;
         }
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        
+        if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             http_response_code(400);
             echo json_encode(['erro' => 'Email inválido.']);
             return;
         }
-        if (!preg_match('/^\d{3}\.\d{3}\.\d{3}-\d{2}$/', $documento)) {
+
+        // Validação flexível para CPF formatado ou numérico
+        if (!preg_match('/^\d{3}\.\d{3}\.\d{3}-\d{2}$/', $documento) && !preg_match('/^\d{11}$/', $documento)) {
             http_response_code(400);
-            echo json_encode(['erro' => 'Documento inválido.']);
+            echo json_encode(['erro' => 'Documento inválido. Certifique-se de digitar um CPF válido.']);
             return;
         }
 
-        if (!preg_match('/^\(\d{2}\) \d{5}-\d{4}$/', $telefone)) {
+        // Validação flexível para aceitar variações de espaços no celular/fixo
+        if ($telefone !== '' && !preg_match('/^\(\d{2}\)\s?\d{4,5}-\d{4}$/', $telefone)) {
             http_response_code(400);
-            echo json_encode(['erro' => 'Telefone inválido.']);
-            return;
-        }
-        
-        if (!in_array($periodo, ['manhã', 'tarde', 'noite'], true)) {
-            http_response_code(400);
-            echo json_encode(['erro' => 'Período inválido.']);
+            echo json_encode(['erro' => 'Formato de telefone inválido.']);
             return;
         }
 
-        if(!in_array($status, ['ativo', 'inativo'], true)) {
+        if (!in_array($status, ['ativo', 'inativo'], true)) {
             http_response_code(400);
             echo json_encode(['erro' => 'Status inválido.']);
             return;
         }
 
-        try{
+        try {
             $sql = 'INSERT INTO pessoas
                     (nome, documento, telefone, email, curso, periodo,
                       status, observacoes)
@@ -117,7 +117,7 @@ class PessoasController
             $stmt->bindValue(':telefone', $telefone);
             $stmt->bindValue(':email', $email);
             $stmt->bindValue(':curso', $curso);
-            $stmt->bindValue(':periodo', $periodo);
+            $stmt->bindValue(':periodo', $periodo, $periodo === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
             $stmt->bindValue(':status', $status);
             $stmt->bindValue(':observacoes', $observacoes);
             $stmt->execute();
@@ -131,11 +131,11 @@ class PessoasController
 
         } catch (PDOException $e) {
             http_response_code(500);
-            echo json_encode(['erro' => 'Erro ao cadastrar pessoa: ']);
+            echo json_encode(['erro' => 'Erro ao cadastrar pessoa no banco de dados.']);
         }
     }
 
-        public function atualizar(): void
+    public function atualizar(): void
     {
         header('Content-Type: application/json; charset=utf-8');
 
@@ -145,47 +145,45 @@ class PessoasController
         $telefone = trim($_POST['telefone'] ?? '');
         $email = trim($_POST['email'] ?? '');
         $curso = trim($_POST['curso'] ?? '');
-        $periodo = trim($_POST['periodo'] ?? '');
+        
+        // MODIFICAÇÃO: Converte para inteiro de forma limpa
+        $periodo = isset($_POST['periodo']) && $_POST['periodo'] !== '' ? (int)$_POST['periodo'] : null;
         $status = $_POST['status'] ?? 'ativo';
         $observacoes = trim($_POST['observacoes'] ?? '');
 
-        if (!$id || $nome === '' || $documento === '' || $email === '') {
+        if (!$id || $nome === '' || $documento === '') {
             http_response_code(400);
             echo json_encode(['erro' => 'ID, nome e documento são obrigatórios.']);
             return;
         }
 
-        if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             http_response_code(400);
             echo json_encode(['erro' => 'Email inválido.']);
             return;
         }
 
-        if (!preg_match('/^\d{3}\.\d{3}\.\d{3}-\d{2}$/', $documento)) {
+        // Validação flexível para CPF formatado ou numérico
+        if (!preg_match('/^\d{3}\.\d{3}\.\d{3}-\d{2}$/', $documento) && !preg_match('/^\d{11}$/', $documento)) {
             http_response_code(400);
             echo json_encode(['erro' => 'Documento inválido.']);
             return;
         }
 
-        if (!preg_match('/^\(\d{2}\) \d{5}-\d{4}$/', $telefone)) {
+        // Validação flexível para aceitar variações de espaços no celular/fixo
+        if ($telefone !== '' && !preg_match('/^\(\d{2}\)\s?\d{4,5}-\d{4}$/', $telefone)) {
             http_response_code(400);
-            echo json_encode(['erro' => 'Telefone inválido.']);
-            return;
-        }
-        
-        if (!in_array($periodo, ['manhã', 'tarde', 'noite'], true)) {
-            http_response_code(400);
-            echo json_encode(['erro' => 'Período inválido.']);
+            echo json_encode(['erro' => 'Formato de telefone inválido.']);
             return;
         }
 
-        if(!in_array($status, ['ativo', 'inativo'], true)) {
+        if (!in_array($status, ['ativo', 'inativo'], true)) {
             http_response_code(400);
             echo json_encode(['erro' => 'Status inválido.']);
             return;
         }
 
-        try{
+        try {
             $sql = 'UPDATE pessoas
                     SET nome = :nome,
                         documento = :documento,
@@ -203,7 +201,7 @@ class PessoasController
             $stmt->bindValue(':telefone', $telefone);
             $stmt->bindValue(':email', $email);
             $stmt->bindValue(':curso', $curso);
-            $stmt->bindValue(':periodo', $periodo);
+            $stmt->bindValue(':periodo', $periodo, $periodo === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
             $stmt->bindValue(':status', $status);
             $stmt->bindValue(':observacoes', $observacoes);
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
@@ -212,10 +210,11 @@ class PessoasController
             echo json_encode(['mensagem' => 'Pessoa atualizada com sucesso.'], JSON_UNESCAPED_UNICODE);
         } catch (PDOException $e) {
             http_response_code(500);
-            echo json_encode(['erro' => 'Erro ao atualizar pessoa: ']);
+            echo json_encode(['erro' => 'Erro ao atualizar os dados no banco de dados.']);
         }
     }
-        public function excluir(): void
+
+    public function excluir(): void
     {
         header('Content-Type: application/json; charset=utf-8');
 
@@ -227,20 +226,20 @@ class PessoasController
             return;
         }
 
-        try{
+        try {
             $sql = 'DELETE FROM pessoas WHERE id = :id';
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
 
-            echo json_encode(['mensagem' => 'Pessoa excluida com sucesso.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['mensagem' => 'Pessoa excluída com sucesso.'], JSON_UNESCAPED_UNICODE);
         } catch (PDOException $e) {
             http_response_code(500);
             echo json_encode(['erro' => 'Erro ao excluir pessoa: ']);
         }
     }
 
-        public function inativar(): void
+    public function inativar(): void
     {
         header('Content-Type: application/json; charset=utf-8');
 
@@ -252,7 +251,7 @@ class PessoasController
             return;
         }
 
-        try{
+        try {
             $sql = 'UPDATE pessoas SET status = "inativo" WHERE id = :id';
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
@@ -264,4 +263,4 @@ class PessoasController
             echo json_encode(['erro' => 'Erro ao inativar pessoa: ']);
         }
     }
-} 
+}

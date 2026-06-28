@@ -1,5 +1,11 @@
 <?php
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// ... restante do seu routes.php original
+require_once __DIR__ . '/app/Controllers/FrontendController.php';
 require_once __DIR__ . '/app/Controllers/UsuariosController.php';
 require_once __DIR__ . '/app/Controllers/AtendimentosController.php';
 require_once __DIR__ . '/app/Controllers/PessoasController.php';
@@ -50,6 +56,27 @@ switch ($controller) {
     }
     break;
 
+    case 'frontend':
+        exigirAutenticacao();
+        $frontendController = new FrontendController();
+
+        switch ($action) {
+            case 'pessoas':
+                $frontendController->pessoas();
+                break;
+            case 'tipos':
+                $frontendController->tipos();
+                break;
+            case 'atendimentos':
+                $frontendController->atendimentos();
+                break;
+            default:
+                http_response_code(404);
+                echo 'Página visual não encontrada.';
+                break;
+        }
+        break;
+
     case 'usuarios':
         $usuariosController = new UsuariosController();
 
@@ -87,6 +114,7 @@ switch ($controller) {
             case 'buscar':
                 $pessoasController->buscarPorId();
                 break;
+            case 'criar':
             case 'cadastrar':
                 $pessoasController->cadastrar();
                 break;
@@ -149,6 +177,7 @@ switch ($controller) {
             case 'buscarAtendimento':
                 $atendimentosController->buscarAtendimento();
                 break;
+            case 'criar':
             case 'criarNovoAtendimento':
                 $atendimentosController->criarNovoAtendimento();
                 break;

@@ -51,17 +51,19 @@ require __DIR__ . '/../layouts/header.php';
 
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
-    const targets = {
-        pessoas: document.getElementById('totalPessoas'),
-        tipos: document.getElementById('totalTipos'),
-        atendimentos: document.getElementById('totalAtendimentos'),
-    };
+    try {
+        const response = await AtendeLabApi.get('dashboard', 'resumo');
+        const indicadores = response.indicadores || {};
 
-    for (const [controller, element] of Object.entries(targets)){
-        try {
-            const response = await AtendeLabApi.get(controller, 'listar');
-            element.textContent = AtendeLabApi.tolist(response).length;
-        } catch (error){
+        document.getElementById('totalPessoas').textContent =
+            indicadores.total_pessoas ?? 0;
+        document.getElementById('totalTipos').textContent =
+            indicadores.total_tipos ?? 0;
+        document.getElementById('totalAtendimentos').textContent =
+            indicadores.total_atendimentos ?? 0;
+    } catch (error) {
+        for (const id of ['totalPessoas', 'totalTipos', 'totalAtendimentos']) {
+            const element = document.getElementById(id);
             element.textContent = '!';
             element.title = error.message;
         }

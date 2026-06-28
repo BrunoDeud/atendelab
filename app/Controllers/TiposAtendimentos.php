@@ -84,8 +84,8 @@ class TiposAtendimentos
 
         $stmt = $this->pdo->query($sql);
         $tipos_atendimentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $this->jsonResponse($tipos_atendimentos);
+        header('Content-Type: application/json');
+        echo json_encode($tipos_atendimentos, JSON_UNESCAPED_UNICODE);
     }
 
     public function atualizarAtendimento(): void

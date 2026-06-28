@@ -117,7 +117,7 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `perfil`, `status`, `criado_em`, `atualizado_em`) VALUES
-(1, 'Administrador', 'admin@atendelab.com', '$2y$10$J9P2kU2BAMZ3TZcuxTsW4e1D/lka8EocyHzvyoZmCNcWDQz3RuVC', 'admin', 'ativo', '2026-06-26 18:52:49', '2026-06-26 18:52:49');
+(1, 'Administrador', 'admin@atendelab.com', '$2y$10$deZ6f71bI6kLg964L76Bcu2p1E5zP2HwM5m9yYk9A3r5v6u8t1B2q', 'admin', 'ativo', '2026-06-26 18:52:49', '2026-06-26 18:52:49');
 
 --
 -- Índices para tabelas despejadas

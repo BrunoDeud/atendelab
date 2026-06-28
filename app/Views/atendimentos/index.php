@@ -153,7 +153,7 @@ require __DIR__ . '/../layouts/header.php';
     async function carregarCombos() {
         const [pessoasResp, tiposResp] = await Promise.all([
             AtendeLabApi.get('pessoas', 'listar'),
-            AtendeLabApi.get('tipos', 'listar')
+            AtendeLabApi.get('tipos', 'listarTipoAtendimento')
         ]);
 
         const pessoas = AtendeLabApi
@@ -182,7 +182,7 @@ require __DIR__ . '/../layouts/header.php';
 
     async function carregarAtendimentos() {
         try {
-            const resposta = await AtendeLabApi.get('atendimentos', 'listar');
+            const resposta = await AtendeLabApi.get('atendimentos', 'listarAtendimentos');
             const atendimentos = AtendeLabApi.toList(resposta);
             const tbody = document.getElementById('tabelaAtendimentos');
 
@@ -198,9 +198,9 @@ require __DIR__ . '/../layouts/header.php';
             }
 
             tbody.innerHTML = atendimentos.map(atendimento => {
-                const pessoa = labelRegistro(atendimento, 'pessoa', 'pessoa_nome', 'nome_pessoa');
-                const tipo = labelRegistro(atendimento, 'tipo', 'tipo_nome', 'tipo_atendimento', 'nome_tipo');
-                const responsavel = labelRegistro(atendimento, 'responsavel', 'usuario', 'usuario_nome', 'nome_usuario');
+                const pNome = labelRegistro(atendimento, 'pessoa_nome', 'pessoa', 'nome_pessoa');
+                const tNome = labelRegistro(atendimento, 'tipo_nome', 'tipo', 'tipo_atendimento');
+                const rNome = labelRegistro(atendimento, 'responsavel_nome', 'responsavel', 'usuario');
                 const data = labelRegistro(atendimento, 'data_atendimento', 'data');
 
                 const classeStatus = atendimento.status === 'concluido'
@@ -212,9 +212,9 @@ require __DIR__ . '/../layouts/header.php';
                 return `
                     <tr>
                         <td>${AtendeLabApi.escape(atendimento.id)}</td>
-                        <td>${AtendeLabApi.escape(pessoa)}</td>
-                        <td>${AtendeLabApi.escape(tipo)}</td>
-                        <td>${AtendeLabApi.escape(responsavel)}</td>
+                        <td>${AtendeLabApi.escape(pNome)}</td>
+                        <td>${AtendeLabApi.escape(tNome)}</td>
+                        <td>${AtendeLabApi.escape(rNome)}</td>
                         <td>${AtendeLabApi.escape(data)}</td>
                         <td>
                             <span class="badge ${classeStatus}">
@@ -238,8 +238,8 @@ require __DIR__ . '/../layouts/header.php';
     formAtendimento.addEventListener('submit', async event => {
         event.preventDefault();
         try {
-            await AtendeLabApi.post('atendimentos', 'criar', new FormData(formAtendimento));
-            AtendeLabApi.showAlert('alerta', 'Atendimento registrado com sucesso.');
+            await AtendeLabApi.post('atendimentos', 'criarNovoAtendimento', new FormData(formAtendimento));
+            AtendeLabApi.showAlert('alerta', 'Atendimento registrado com sucesso.', 'success');
             fecharFormulario();
             await carregarAtendimentos();
         } catch (error) {
@@ -259,7 +259,7 @@ require __DIR__ . '/../layouts/header.php';
         try {
             await AtendeLabApi.post('atendimentos', 'alterarStatus', new FormData(event.target));
             statusModal().hide();
-            AtendeLabApi.showAlert('alerta', 'Status atualizado com sucesso.');
+            AtendeLabApi.showAlert('alerta', 'Status atualizado com sucesso.', 'success');
             await carregarAtendimentos();
         } catch (error) {
             AtendeLabApi.showAlert('alerta', error.message, 'danger');
